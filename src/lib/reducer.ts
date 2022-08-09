@@ -55,7 +55,7 @@ export const reducer = (state: State, action: Action): State => {
     case "GAIN_REQUIRED_TO_SELECTION": {
       traverseSelected(state.root.children, (layer) => ({
         ...layer,
-        name: `*${layer.name}`,
+        name: `!${layer.name}`,
         kind: "REQUIRED",
       }));
       return { ...state };
