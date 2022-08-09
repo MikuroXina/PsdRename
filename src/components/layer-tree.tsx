@@ -23,7 +23,7 @@ const SubLayerTree = ({
           <div className="layer-entry">
             <input
               type="checkbox"
-              defaultChecked={isSelected}
+              checked={isSelected}
               onChange={onToggleSelect}
             />
             {sourceInfo?.canvas && (
