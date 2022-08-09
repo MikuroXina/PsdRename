@@ -1,9 +1,9 @@
-import { LayerStructure, traverseByPath, traverseSelected } from "./layers";
+import { LayerRoot, traverseByPath, traverseSelected } from "./layers";
 
 export type Action =
   | {
       type: "OPEN_PSD";
-      rootLayers: Map<string, LayerStructure>;
+      root: LayerRoot;
     }
   | {
       type: "SELECT_LAYER";
@@ -16,12 +16,16 @@ export type Action =
 export type Dispatcher = (action: Action) => void;
 
 export interface State {
-  layers: Map<string, LayerStructure>;
+  root: LayerRoot;
   doStack: [];
 }
 
 export const initialState = (): State => ({
-  layers: new Map(),
+  root: {
+    width: 0,
+    height: 0,
+    children: new Map(),
+  },
   doStack: [],
 });
 
@@ -30,11 +34,11 @@ export const reducer = (state: State, action: Action): State => {
     case "OPEN_PSD": {
       return {
         ...state,
-        layers: action.rootLayers,
+        root: action.root,
       };
     }
     case "SELECT_LAYER": {
-      const res = traverseByPath(state.layers, action.path);
+      const res = traverseByPath(state.root, action.path);
       if (!res) {
         return state;
       }
@@ -49,7 +53,7 @@ export const reducer = (state: State, action: Action): State => {
       };
     }
     case "GAIN_REQUIRED_TO_SELECTION": {
-      traverseSelected(state.layers, (layer) => ({
+      traverseSelected(state.root.children, (layer) => ({
         ...layer,
         name: `*${layer.name}`,
         kind: "REQUIRED",

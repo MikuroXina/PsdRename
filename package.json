@@ -16,12 +16,14 @@
   },
   "dependencies": {
     "ag-psd": "^14.5.3",
+    "file-saver": "^2.0.5",
     "next": "^12.2.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "@next/eslint-plugin-next": "^12.2.4",
+    "@types/file-saver": "^2.0.5",
     "@types/node": "^18.6.5",
     "@types/react": "^18.0.17",
     "@typescript-eslint/eslint-plugin": "^5.33.0",

@@ -1,9 +1,10 @@
 import { ChangeEvent, useReducer } from "react";
-import type { NextPage } from "next";
-import { readPsd } from "ag-psd";
-import { LayerTree } from "../components/layer-tree";
-import { parseRootLayer } from "../lib/layers";
+import { exportAsPsd, parseRootLayer } from "../lib/layers";
 import { initialState, reducer } from "../lib/reducer";
+import { readPsd, writePsd } from "ag-psd";
+import { LayerTree } from "../components/layer-tree";
+import type { NextPage } from "next";
+import { saveAs } from "file-saver";
 
 const Page: NextPage = () => {
   const [state, dispatch] = useReducer(reducer, initialState());
@@ -13,7 +14,14 @@ const Page: NextPage = () => {
     }
     const file = e.target.files[0];
     const redPsd = readPsd(await file.arrayBuffer());
-    dispatch({ type: "OPEN_PSD", rootLayers: parseRootLayer(redPsd) });
+    dispatch({ type: "OPEN_PSD", root: parseRootLayer(redPsd) });
+  };
+  const onClickSave = async () => {
+    const psd = exportAsPsd(state.root);
+    console.dir(psd);
+    const buffer = writePsd(psd);
+    const blob = new Blob([buffer], { type: "application/octet-stream" });
+    saveAs(blob, "renamed.psd");
   };
   const onClickAddRequired = () => {
     dispatch({ type: "GAIN_REQUIRED_TO_SELECTION" });
@@ -26,8 +34,14 @@ const Page: NextPage = () => {
         Open PSD File
         <input type="file" onChange={onOpenFile} />
       </label>
+      <button onClick={onClickSave}>Save as PSD</button>
       <div className="layer-tree">
-        {<LayerTree layers={[...state.layers.values()]} dispatch={dispatch} />}
+        {
+          <LayerTree
+            layers={[...state.root.children.values()]}
+            dispatch={dispatch}
+          />
+        }
       </div>
       <div className="controls">
         <button onClick={onClickAddRequired}>選択範囲に必須フラグを付与</button>

@@ -1,12 +1,21 @@
-import type { Layer } from "ag-psd";
+import type { Layer, Psd } from "ag-psd";
 
 export type LayerKind = "OPTIONAL" | "REQUIRED" | "RADIO";
+
+export type LayerChildren = Map<string, LayerStructure>;
 
 export interface LayerStructure {
   name: string;
   kind: LayerKind;
   isSelected: boolean;
-  children: Map<string, LayerStructure>;
+  sourceInfo?: Layer;
+  children: LayerChildren;
+}
+
+export interface LayerRoot {
+  width: number;
+  height: number;
+  children: LayerChildren;
 }
 
 const kindFromName = (name: string): LayerKind =>
@@ -19,21 +28,42 @@ const kindFromName = (name: string): LayerKind =>
 const parseLayer = (layer: Layer): LayerStructure => ({
   name: layer.name ?? "",
   kind: kindFromName(layer.name ?? ""),
+  sourceInfo: layer,
   isSelected: false,
   children: new Map(
     layer.children?.map((layer) => [layer.name ?? "", parseLayer(layer)]) ?? [],
   ),
 });
 
-export const parseRootLayer = (root: Layer): Map<string, LayerStructure> =>
-  new Map(
+export const parseRootLayer = (root: Psd): LayerRoot => ({
+  width: root.width,
+  height: root.height,
+  children: new Map(
     root.children?.map((layer) => [layer.name ?? "", parseLayer(layer)]) ?? [],
-  );
+  ),
+});
+
+const exportAsLayer = (children: LayerChildren): Layer[] =>
+  [...children.values()].map((child) => ({
+    ...child.sourceInfo,
+    name: child.name,
+    canvas: child.sourceInfo?.canvas,
+    children: child.sourceInfo?.canvas
+      ? undefined
+      : exportAsLayer(child.children),
+  }));
+
+export const exportAsPsd = (root: LayerRoot): Psd => ({
+  width: root.width,
+  height: root.height,
+  children: exportAsLayer(root.children),
+});
 
 export const traverseByPath = (
-  children: Map<string, LayerStructure>,
+  root: LayerRoot,
   path: (string | undefined)[],
-): [Map<string, LayerStructure>, string] | undefined => {
+): [LayerChildren, string] | undefined => {
+  let children = root.children;
   while (true) {
     const [nextLayer] = path;
     if (!nextLayer) {
@@ -58,7 +88,7 @@ export const traverseByPath = (
 };
 
 export const traverseSelected = (
-  children: Map<string, LayerStructure>,
+  children: LayerChildren,
   fn: (layer: Readonly<LayerStructure>) => LayerStructure,
 ): void => {
   for (const [key, value] of children.entries()) {
