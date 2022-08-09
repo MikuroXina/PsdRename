@@ -49,8 +49,6 @@ export const traverseByPath = (
     children = entry.children;
     path.shift();
   }
-  console.log(path);
-  console.log(children);
   const key = path[0]!;
   const entry = children.get(key);
   if (!entry) {
