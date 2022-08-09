@@ -13,7 +13,7 @@ const SubLayerTree = ({
   dispatch,
 }: SubLayerTreeProps) => {
   const onToggleSelect = () => {
-    dispatch({ type: "SELECT_LAYER", path });
+    dispatch({ type: "TOGGLE_LAYER_SELECTION", path });
   };
 
   return (

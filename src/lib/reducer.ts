@@ -14,7 +14,7 @@ export type Action =
       filename: string;
     }
   | {
-      type: "SELECT_LAYER";
+      type: "TOGGLE_LAYER_SELECTION";
       path: (string | undefined)[];
     }
   | {
@@ -73,7 +73,7 @@ export const reducer = (state: State, action: Action): State => {
         filename: action.filename,
       };
 
-    case "SELECT_LAYER": {
+    case "TOGGLE_LAYER_SELECTION": {
       const res = traverseByPath(state.root, action.path);
       if (!res) {
         return state;
@@ -83,7 +83,7 @@ export const reducer = (state: State, action: Action): State => {
       if (!entry) {
         return state;
       }
-      children.set(key, { ...entry, isSelected: true });
+      children.set(key, { ...entry, isSelected: !entry.isSelected });
       return {
         ...state,
       };
