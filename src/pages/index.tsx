@@ -25,7 +25,6 @@ const Page: NextPage = () => {
       return;
     }
     const psd = exportAsPsd(state.root);
-    console.dir(psd);
     const buffer = writePsd(psd);
     const blob = new Blob([buffer], { type: "application/octet-stream" });
     saveAs(blob, state.filename);
