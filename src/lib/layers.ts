@@ -47,8 +47,7 @@ const exportAsLayer = (children: LayerChildren): Layer[] =>
   [...children.values()].map((child) => ({
     ...child.sourceInfo,
     name: child.name,
-    canvas: child.sourceInfo?.canvas,
-    children: child.sourceInfo?.canvas
+    children: child.sourceInfo?.imageData
       ? undefined
       : exportAsLayer(child.children),
   }));

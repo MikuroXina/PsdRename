@@ -13,7 +13,9 @@ const Page: NextPage = () => {
       return;
     }
     const file = e.target.files[0];
-    const redPsd = readPsd(await file.arrayBuffer());
+    const redPsd = readPsd(await file.arrayBuffer(), {
+      useImageData: true,
+    });
     dispatch({ type: "OPEN_PSD", root: parseRootLayer(redPsd) });
   };
   const onClickSave = async () => {
