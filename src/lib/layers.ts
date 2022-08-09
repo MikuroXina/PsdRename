@@ -15,6 +15,7 @@ export interface LayerStructure {
 export interface LayerRoot {
   width: number;
   height: number;
+  sourceInfo?: Psd;
   children: LayerChildren;
 }
 
@@ -38,6 +39,7 @@ const parseLayer = (layer: Layer): LayerStructure => ({
 export const parseRootLayer = (root: Psd): LayerRoot => ({
   width: root.width,
   height: root.height,
+  sourceInfo: root,
   children: new Map(
     root.children?.map((layer) => [layer.name ?? "", parseLayer(layer)]) ?? [],
   ),
@@ -53,6 +55,7 @@ const exportAsLayer = (children: LayerChildren): Layer[] =>
   }));
 
 export const exportAsPsd = (root: LayerRoot): Psd => ({
+  ...root.sourceInfo,
   width: root.width,
   height: root.height,
   children: exportAsLayer(root.children),

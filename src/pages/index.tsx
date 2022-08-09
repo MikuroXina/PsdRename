@@ -14,14 +14,21 @@ const Page: NextPage = () => {
     }
     const file = e.target.files[0];
     const redPsd = readPsd(await file.arrayBuffer());
-    dispatch({ type: "OPEN_PSD", root: parseRootLayer(redPsd) });
+    dispatch({
+      type: "OPEN_PSD",
+      filename: file.name,
+      root: parseRootLayer(redPsd),
+    });
   };
   const onClickSave = async () => {
+    if (!state.filename) {
+      return;
+    }
     const psd = exportAsPsd(state.root);
     console.dir(psd);
     const buffer = writePsd(psd);
     const blob = new Blob([buffer], { type: "application/octet-stream" });
-    saveAs(blob, "renamed.psd");
+    saveAs(blob, state.filename);
   };
   const onClickAddRequired = () => {
     dispatch({ type: "GAIN_REQUIRED_TO_SELECTION" });

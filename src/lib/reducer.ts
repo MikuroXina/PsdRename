@@ -4,6 +4,7 @@ export type Action =
   | {
       type: "OPEN_PSD";
       root: LayerRoot;
+      filename: string;
     }
   | {
       type: "SELECT_LAYER";
@@ -17,6 +18,7 @@ export type Dispatcher = (action: Action) => void;
 
 export interface State {
   root: LayerRoot;
+  filename?: string;
   doStack: [];
 }
 
@@ -26,6 +28,7 @@ export const initialState = (): State => ({
     height: 0,
     children: new Map(),
   },
+  filename: undefined,
   doStack: [],
 });
 
@@ -35,6 +38,7 @@ export const reducer = (state: State, action: Action): State => {
       return {
         ...state,
         root: action.root,
+        filename: action.filename,
       };
     }
     case "SELECT_LAYER": {
