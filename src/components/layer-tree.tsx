@@ -8,13 +8,14 @@ interface SubLayerTreeProps {
 }
 
 const SubLayerTree = ({
-  layer: { name, isSelected, children },
+  layer: { name, isSelected, children, sourceInfo },
   path,
   dispatch,
 }: SubLayerTreeProps) => {
   const onToggleSelect = () => {
     dispatch({ type: "SELECT_LAYER", path });
   };
+
   return (
     <div>
       <ol>
@@ -25,6 +26,9 @@ const SubLayerTree = ({
               defaultChecked={isSelected}
               onChange={onToggleSelect}
             />
+            {sourceInfo?.canvas && (
+              <img src={sourceInfo?.canvas?.toDataURL()} />
+            )}
             <label>{name}</label>
           </div>
           {[...children.values()].reverse().map((child) => (
@@ -42,6 +46,11 @@ const SubLayerTree = ({
           display: flex;
           flex-flow: row;
           align-items: center;
+        }
+        img {
+          width: 20px;
+          height: 20px;
+          object-fit: contain;
         }
         ol {
           margin: 0;
