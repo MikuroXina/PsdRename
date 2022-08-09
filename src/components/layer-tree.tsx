@@ -9,7 +9,7 @@ const SubLayerTree = ({ name, isSelected, children }: LayerStructure) => {
             <input type="checkbox" defaultChecked={isSelected} />
             <label>{name}</label>
           </div>
-          {[...children.values()].map((child, index) => (
+          {[...children.values()].reverse().map((child, index) => (
             <SubLayerTree key={index} {...child} />
           ))}
         </li>
@@ -32,13 +32,13 @@ const SubLayerTree = ({ name, isSelected, children }: LayerStructure) => {
 };
 
 export interface LayerTreeProps {
-  layers: readonly LayerStructure[];
+  layers: LayerStructure[];
 }
 
 export const LayerTree = ({ layers }: LayerTreeProps) => {
   return (
     <div>
-      {layers.map((child, index) => (
+      {layers.reverse().map((child, index) => (
         <SubLayerTree key={index} {...child} />
       ))}
     </div>
