@@ -19,6 +19,21 @@ export interface LayerRoot {
   children: LayerChildren;
 }
 
+export const removeKindPrefix = (name: string): string => {
+  while (name.startsWith("!") || name.startsWith("*")) {
+    name = name.substring(1);
+  }
+  return name;
+};
+
+export const appendRequiredPrefix = (name: string) => `!${name}`;
+export const appendRadioPrefix = (name: string) => `*${name}`;
+
+export const overwritePrefixAsRequired = (name: string) =>
+  appendRequiredPrefix(removeKindPrefix(name));
+export const overwritePrefixAsRadio = (name: string) =>
+  appendRadioPrefix(removeKindPrefix(name));
+
 const kindFromName = (name: string): LayerKind =>
   name.startsWith("!")
     ? "REQUIRED"
