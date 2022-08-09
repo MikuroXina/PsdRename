@@ -1,16 +1,39 @@
 import type { LayerStructure } from "../lib/layers";
+import type { Dispatcher } from "../lib/reducer";
 
-const SubLayerTree = ({ name, isSelected, children }: LayerStructure) => {
+interface SubLayerTreeProps {
+  layer: LayerStructure;
+  path: string[];
+  dispatch: Dispatcher;
+}
+
+const SubLayerTree = ({
+  layer: { name, isSelected, children },
+  path,
+  dispatch,
+}: SubLayerTreeProps) => {
+  const onToggleSelect = () => {
+    dispatch({ type: "SELECT_LAYER", path });
+  };
   return (
     <div>
       <ol>
         <li>
           <div className="layer-entry">
-            <input type="checkbox" defaultChecked={isSelected} />
+            <input
+              type="checkbox"
+              defaultChecked={isSelected}
+              onChange={onToggleSelect}
+            />
             <label>{name}</label>
           </div>
-          {[...children.values()].reverse().map((child, index) => (
-            <SubLayerTree key={index} {...child} />
+          {[...children.values()].reverse().map((child) => (
+            <SubLayerTree
+              key={child.name}
+              path={[...path, child.name]}
+              layer={child}
+              dispatch={dispatch}
+            />
           ))}
         </li>
       </ol>
@@ -33,13 +56,19 @@ const SubLayerTree = ({ name, isSelected, children }: LayerStructure) => {
 
 export interface LayerTreeProps {
   layers: LayerStructure[];
+  dispatch: Dispatcher;
 }
 
-export const LayerTree = ({ layers }: LayerTreeProps) => {
+export const LayerTree = ({ layers, dispatch }: LayerTreeProps) => {
   return (
     <div>
-      {layers.reverse().map((child, index) => (
-        <SubLayerTree key={index} {...child} />
+      {layers.reverse().map((child) => (
+        <SubLayerTree
+          key={child.name}
+          path={[child.name]}
+          layer={child}
+          dispatch={dispatch}
+        />
       ))}
     </div>
   );
