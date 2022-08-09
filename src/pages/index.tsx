@@ -2,6 +2,7 @@ import { ChangeEvent, useReducer } from "react";
 import { exportAsPsd, parseRootLayer } from "../lib/layers";
 import { initialState, reducer } from "../lib/reducer";
 import { readPsd, writePsd } from "ag-psd";
+import { Controls } from "../components/controls";
 import { LayerTree } from "../components/layer-tree";
 import type { NextPage } from "next";
 import { saveAs } from "file-saver";
@@ -29,9 +30,6 @@ const Page: NextPage = () => {
     const blob = new Blob([buffer], { type: "application/octet-stream" });
     saveAs(blob, state.filename);
   };
-  const onClickAddRequired = () => {
-    dispatch({ type: "GAIN_REQUIRED_TO_SELECTION" });
-  };
 
   return (
     <div>
@@ -49,9 +47,7 @@ const Page: NextPage = () => {
           />
         }
       </div>
-      <div className="controls">
-        <button onClick={onClickAddRequired}>選択範囲に必須フラグを付与</button>
-      </div>
+      <Controls dispatch={dispatch} />
       <style jsx>{`
         .layer-tree {
           height: 50vh;
