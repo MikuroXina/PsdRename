@@ -18,8 +18,8 @@ import { set } from "monolite";
 export interface State {
   root: Readonly<LayerRoot>;
   filename?: string;
-  pastHistory: readonly (Renaming | undefined)[];
-  futureHistory: readonly (Renaming | undefined)[];
+  pastHistory: readonly Renaming[];
+  futureHistory: readonly Renaming[];
 }
 
 const invert = (bool: boolean) => !bool;
@@ -163,12 +163,15 @@ const reducers = {
   REMOVE_PREFIX_FROM_SELECTION: (state: State, action: { prefix: string }) => {
     const [children, renaming] = traverseSelected(
       state.root.children,
-      (layer) => ({
-        ...layer,
-        name: layer.name.startsWith(action.prefix)
-          ? layer.name.substring(action.prefix.length)
-          : layer.name,
-      }),
+      (layer) =>
+        set(
+          layer,
+          (sel) => sel.name,
+          (name) =>
+            name.startsWith(action.prefix)
+              ? name.substring(action.prefix.length)
+              : name,
+        ),
     );
     return set(state)
       .set((sel) => sel.root.children, children)
@@ -181,12 +184,13 @@ const reducers = {
   APPEND_POSTFIX_TO_SELECTION: (state: State, action: { postfix: string }) => {
     const [children, renaming] = traverseSelected(
       state.root.children,
-      (layer) => ({
-        ...layer,
-        name: layer.name.endsWith(action.postfix)
-          ? layer.name
-          : `${layer.name}${action.postfix}`,
-      }),
+      (layer) =>
+        set(
+          layer,
+          (sel) => sel.name,
+          (name) =>
+            name.endsWith(action.postfix) ? name : `${name}${action.postfix}`,
+        ),
     );
     return set(state)
       .set((sel) => sel.root.children, children)
@@ -227,9 +231,6 @@ const reducers = {
   UNDO: (state: State, _action: unknown) => {
     const { pastHistory } = state;
     const toUndo = pastHistory[pastHistory.length - 1];
-    if (!toUndo) {
-      return state;
-    }
     return set(state)
       .set(
         (sel) => sel.root,
@@ -248,9 +249,6 @@ const reducers = {
   REDO: (state: State, _action: unknown) => {
     const { futureHistory } = state;
     const toRedo = futureHistory[futureHistory.length - 1];
-    if (!toRedo) {
-      return state;
-    }
     return set(state)
       .set(
         (sel) => sel.root,
