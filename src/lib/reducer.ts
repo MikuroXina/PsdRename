@@ -67,17 +67,6 @@ export type Action =
       type: "REDO";
     };
 
-const actionTypesCanUndo = [
-  "RENAME_LAYER",
-  "GAIN_REQUIRED_TO_SELECTION",
-  "GAIN_RADIO_TO_SELECTION",
-  "REMOVE_SPECIFIER_FROM_SELECTION",
-  "APPEND_PREFIX_TO_SELECTION",
-  "REMOVE_PREFIX_FROM_SELECTION",
-  "APPEND_POSTFIX_TO_SELECTION",
-  "REMOVE_POSTFIX_FROM_SELECTION",
-] as const;
-
 export type Dispatcher = (action: Action) => void;
 
 export interface State {
