@@ -52,6 +52,7 @@ const Page: NextPage = () => {
         .layer-tree {
           height: 50vh;
           overflow: scroll;
+          box-shadow: inset 2px 2px 8px black;
         }
       `}</style>
     </div>
