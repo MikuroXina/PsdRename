@@ -1,3 +1,4 @@
+import type { ChangeEvent } from "react";
 import type { LayerStructure } from "../lib/layers";
 import type { Dispatcher } from "../lib/reducer";
 
@@ -40,6 +41,9 @@ const SubLayerTree = ({
   const onToggleSelect = () => {
     dispatch({ type: "TOGGLE_LAYER_SELECTION", path });
   };
+  const onChangeName = (e: ChangeEvent<HTMLInputElement>) => {
+    dispatch({ type: "RENAME_LAYER", path, newName: e.target.value });
+  };
 
   return (
     <div>
@@ -55,7 +59,7 @@ const SubLayerTree = ({
               {sourceInfo?.canvas && (
                 <img src={sourceInfo?.canvas?.toDataURL()} />
               )}
-              <label>{name}</label>
+              <input defaultValue={name} onChange={onChangeName} />
             </div>
             <div className="controls">
               <TreeItemControls {...{ path, dispatch }} />
