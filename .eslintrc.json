@@ -89,7 +89,6 @@
     "no-buffer-constructor": "error",
     "no-caller": "error",
     "no-catch-shadow": "error",
-    "no-confusing-arrow": "error",
     "no-constructor-return": "error",
     "no-continue": "error",
     "no-div-regex": "error",
