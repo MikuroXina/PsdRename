@@ -70,11 +70,7 @@ const SubLayerTree = ({
           {Object.values(children)
             .reverse()
             .map((child) => (
-              <SubLayerTree
-                key={child.name}
-                layer={child}
-                dispatch={dispatch}
-              />
+              <SubLayerTree key={child.id} layer={child} dispatch={dispatch} />
             ))}
         </li>
       </ol>
@@ -118,7 +114,7 @@ export const LayerTree = ({ layers, dispatch }: LayerTreeProps) => {
   return (
     <div>
       {[...layers].reverse().map((child) => (
-        <SubLayerTree key={child.name} layer={child} dispatch={dispatch} />
+        <SubLayerTree key={child.id} layer={child} dispatch={dispatch} />
       ))}
     </div>
   );
