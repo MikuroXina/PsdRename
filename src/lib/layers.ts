@@ -25,10 +25,11 @@ export interface LayerRoot {
 }
 
 export const removeKindPrefix = (name: string): string => {
-  while (name.startsWith("!") || name.startsWith("*")) {
-    name = name.substring(1);
+  let editing = name;
+  while (editing.startsWith("!") || editing.startsWith("*")) {
+    editing = editing.substring(1);
   }
-  return name;
+  return editing;
 };
 
 export const appendRequiredPrefix = (name: string) => `!${name}`;
@@ -50,15 +51,21 @@ const joinSeparator = (path: LayerPath, sep: string): string[] => {
 export const joinChildrenSep = (path: LayerPath) =>
   joinSeparator(path, "children");
 
-const kindFromName = (name: string): LayerKind =>
-  name.startsWith("!")
-    ? "REQUIRED"
-    : name.startsWith("*")
-    ? "RADIO"
-    : "OPTIONAL";
+const kindFromName = (name: string): LayerKind => {
+  if (name.startsWith("!")) {
+    return "REQUIRED";
+  }
+  if (name.startsWith("*")) {
+    return "RADIO";
+  }
+  return "OPTIONAL";
+};
 
 let idStatic = 0;
-const newId = (): LayerId => ++idStatic as LayerId;
+const newId = (): LayerId => {
+  idStatic += 1;
+  return idStatic as LayerId;
+};
 
 const parseLayer = (
   id: LayerId,
@@ -74,9 +81,9 @@ const parseLayer = (
     sourceInfo: layer,
     isSelected: false,
     children: Object.fromEntries(
-      layer.children?.map((layer) => {
-        const id = newId();
-        return [id, parseLayer(id, layer, path)];
+      layer.children?.map((child) => {
+        const childId = newId();
+        return [childId, parseLayer(childId, child, path)];
       }) ?? [],
     ),
   };
@@ -160,7 +167,7 @@ export const traverseSelected = (
         fn,
       );
       remaining.push(...innerRenaming);
-      const traversedValue = set(value, (s) => s.children, innerChildren);
+      const traversedValue = set(value, (sel) => sel.children, innerChildren);
       if (!value.isSelected) {
         return [key, traversedValue];
       }
@@ -176,4 +183,31 @@ export const traverseSelected = (
     }),
   );
   return [newChildren, remaining];
+};
+
+export const applyUndo = (toApply: LayerRoot, toUndo: Renaming) => {
+  let root = toApply;
+  for (const op of toUndo) {
+    const [newRoot] = traverseByPath(root, [...op.path], (layer) =>
+      set(layer)
+        .set((sel) => sel.name, op.originalName)
+        .set((sel) => sel.kind, op.originalKind)
+        .end(),
+    );
+    root = newRoot;
+  }
+  return root;
+};
+export const applyRedo = (toApply: LayerRoot, toRedo: Renaming) => {
+  let root = toApply;
+  for (const op of toRedo) {
+    const [newRoot] = traverseByPath(root, [...op.path], (layer) =>
+      set(layer)
+        .set((sel) => sel.name, op.newName)
+        .set((sel) => sel.kind, op.newKind)
+        .end(),
+    );
+    root = newRoot;
+  }
+  return root;
 };

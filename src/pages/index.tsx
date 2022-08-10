@@ -1,51 +1,55 @@
 import { ChangeEvent, useReducer } from "react";
+import { Psd, readPsd, writePsd } from "ag-psd";
 import { exportAsPsd, parseRootLayer } from "../lib/layers";
 import { initialState, reducer } from "../lib/reducer";
-import { readPsd, writePsd } from "ag-psd";
 import { Controls } from "../components/controls";
 import { LayerTree } from "../components/layer-tree";
 import type { NextPage } from "next";
 import { saveAs } from "file-saver";
 
+const saveBufferAsFile = (psd: Psd, filename: string) => {
+  const buffer = writePsd(psd);
+  const blob = new Blob([buffer], { type: "application/octet-stream" });
+  saveAs(blob, filename);
+};
+
 const Page: NextPage = () => {
-  const [state, dispatch] = useReducer(reducer, initialState());
-  const onOpenFile = async (e: ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files) {
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const onOpenFile = async (event: ChangeEvent<HTMLInputElement>) => {
+    if (!event.target.files) {
       return;
     }
-    const file = e.target.files[0];
+    const [file] = event.target.files;
     const redPsd = readPsd(await file.arrayBuffer());
-    dispatch({
-      type: "OPEN_PSD",
-      filename: file.name,
-      root: parseRootLayer(redPsd),
-    });
+    dispatch([
+      "OPEN_PSD",
+      {
+        filename: file.name,
+        root: parseRootLayer(redPsd),
+      },
+    ]);
   };
-  const onClickSave = async () => {
+  const onClickSave = () => {
     if (!state.filename) {
       return;
     }
     const psd = exportAsPsd(state.root);
-    const buffer = writePsd(psd);
-    const blob = new Blob([buffer], { type: "application/octet-stream" });
-    saveAs(blob, state.filename);
+    saveBufferAsFile(psd, state.filename);
   };
 
   return (
     <div>
       <h1>PsdRename</h1>
       <label>
-        Open PSD File
+        Open PSD File:
         <input type="file" onChange={onOpenFile} />
       </label>
       <button onClick={onClickSave}>Save as PSD</button>
       <div className="layer-tree">
-        {
-          <LayerTree
-            layers={Object.values(state.root.children)}
-            dispatch={dispatch}
-          />
-        }
+        <LayerTree
+          layers={Object.values(state.root.children)}
+          dispatch={dispatch}
+        />
       </div>
       <Controls dispatch={dispatch} />
       <style jsx>{`

@@ -1,5 +1,5 @@
+import { RefObject, useRef } from "react";
 import type { Dispatcher } from "../lib/reducer";
-import { useRef } from "react";
 
 export interface ControlsProps {
   dispatch: Dispatcher;
@@ -9,48 +9,18 @@ export const Controls = ({ dispatch }: ControlsProps) => {
   const prefixPattern = useRef<HTMLInputElement>(null);
   const postfixPattern = useRef<HTMLInputElement>(null);
 
-  const onAddRequired = () => {
-    dispatch({ type: "GAIN_REQUIRED_TO_SELECTION" });
-  };
-  const onAddRadio = () => {
-    dispatch({ type: "GAIN_RADIO_TO_SELECTION" });
-  };
-  const onRemoveSpecifier = () => {
-    dispatch({ type: "REMOVE_SPECIFIER_FROM_SELECTION" });
-  };
-  const onAddPrefix = () => {
-    dispatch({
-      type: "APPEND_PREFIX_TO_SELECTION",
-      prefix: prefixPattern.current?.value ?? "",
-    });
-  };
-  const onRemovePrefix = () => {
-    dispatch({
-      type: "REMOVE_PREFIX_FROM_SELECTION",
-      prefix: prefixPattern.current?.value ?? "",
-    });
-  };
-  const onAddPostfix = () => {
-    dispatch({
-      type: "APPEND_POSTFIX_TO_SELECTION",
-      postfix: postfixPattern.current?.value ?? "",
-    });
-  };
-  const onRemovePostfix = () => {
-    dispatch({
-      type: "REMOVE_POSTFIX_FROM_SELECTION",
-      postfix: postfixPattern.current?.value ?? "",
-    });
-  };
-  const onDeselectAll = () => {
-    dispatch({ type: "DESELECT_ALL" });
-  };
-  const onUndo = () => {
-    dispatch({ type: "UNDO" });
-  };
-  const onRedo = () => {
-    dispatch({ type: "REDO" });
-  };
+  const {
+    onAddRequired,
+    onAddRadio,
+    onRemoveSpecifier,
+    onAddPrefix,
+    onRemovePrefix,
+    onAddPostfix,
+    onRemovePostfix,
+    onDeselectAll,
+    onUndo,
+    onRedo,
+  } = makeCallbacks(dispatch, prefixPattern, postfixPattern);
 
   return (
     <div>
@@ -84,4 +54,51 @@ export const Controls = ({ dispatch }: ControlsProps) => {
       </div>
     </div>
   );
+};
+
+const makeCallbacks = (
+  dispatch: Dispatcher,
+  prefixPattern: RefObject<HTMLInputElement>,
+  postfixPattern: RefObject<HTMLInputElement>,
+) => {
+  const onAddRequired = () => dispatch(["GAIN_REQUIRED_TO_SELECTION", {}]);
+  const onAddRadio = () => dispatch(["GAIN_RADIO_TO_SELECTION", {}]);
+  const onRemoveSpecifier = () =>
+    dispatch(["REMOVE_SPECIFIER_FROM_SELECTION", {}]);
+  const onAddPrefix = () =>
+    dispatch([
+      "APPEND_PREFIX_TO_SELECTION",
+      { prefix: prefixPattern.current?.value ?? "" },
+    ]);
+  const onRemovePrefix = () =>
+    dispatch([
+      "REMOVE_PREFIX_FROM_SELECTION",
+      { prefix: prefixPattern.current?.value ?? "" },
+    ]);
+  const onAddPostfix = () =>
+    dispatch([
+      "APPEND_POSTFIX_TO_SELECTION",
+      { postfix: postfixPattern.current?.value ?? "" },
+    ]);
+  const onRemovePostfix = () =>
+    dispatch([
+      "REMOVE_POSTFIX_FROM_SELECTION",
+      { postfix: postfixPattern.current?.value ?? "" },
+    ]);
+  const onDeselectAll = () => dispatch(["DESELECT_ALL", {}]);
+  const onUndo = () => dispatch(["UNDO", {}]);
+  const onRedo = () => dispatch(["REDO", {}]);
+
+  return {
+    onAddRequired,
+    onAddRadio,
+    onRemoveSpecifier,
+    onAddPrefix,
+    onRemovePrefix,
+    onAddPostfix,
+    onRemovePostfix,
+    onDeselectAll,
+    onUndo,
+    onRedo,
+  };
 };
