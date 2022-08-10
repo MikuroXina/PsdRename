@@ -1,6 +1,31 @@
 import type { LayerStructure } from "../lib/layers";
 import type { Dispatcher } from "../lib/reducer";
 
+interface TreeItemControlsProps {
+  path: string[];
+  dispatch: Dispatcher;
+}
+
+const TreeItemControls = ({ path, dispatch }: TreeItemControlsProps) => {
+  const onToggleChildrenSelect = () => {
+    dispatch({ type: "TOGGLE_CHILDREN_SELECTION", path });
+  };
+  const onToggleDescendantSelect = () => {
+    dispatch({ type: "TOGGLE_DESCENDANT_SELECTION", path });
+  };
+
+  return (
+    <div>
+      <button onClick={onToggleChildrenSelect}>
+        直接の子レイヤーの選択を反転
+      </button>
+      <button onClick={onToggleDescendantSelect}>
+        子孫レイヤーの選択を反転
+      </button>
+    </div>
+  );
+};
+
 interface SubLayerTreeProps {
   layer: LayerStructure;
   path: string[];
@@ -21,15 +46,20 @@ const SubLayerTree = ({
       <ol>
         <li>
           <div className="layer-entry">
-            <input
-              type="checkbox"
-              checked={isSelected}
-              onChange={onToggleSelect}
-            />
-            {sourceInfo?.canvas && (
-              <img src={sourceInfo?.canvas?.toDataURL()} />
-            )}
-            <label>{name}</label>
+            <div>
+              <input
+                type="checkbox"
+                checked={isSelected}
+                onChange={onToggleSelect}
+              />
+              {sourceInfo?.canvas && (
+                <img src={sourceInfo?.canvas?.toDataURL()} />
+              )}
+              <label>{name}</label>
+            </div>
+            <div className="controls">
+              <TreeItemControls {...{ path, dispatch }} />
+            </div>
           </div>
           {[...children.values()].reverse().map((child) => (
             <SubLayerTree
@@ -46,6 +76,13 @@ const SubLayerTree = ({
           display: flex;
           flex-flow: row;
           align-items: center;
+          justify-content: space-between;
+        }
+        .layer-entry > .controls {
+          visibility: hidden;
+        }
+        .layer-entry:hover > .controls {
+          visibility: visible;
         }
         img {
           width: 20px;
@@ -57,6 +94,8 @@ const SubLayerTree = ({
         }
         li {
           list-style: none;
+          border-width: 1px 0 0;
+          border-style: dashed;
         }
       `}</style>
     </div>

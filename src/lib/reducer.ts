@@ -1,5 +1,6 @@
 import {
   LayerRoot,
+  LayerStructure,
   overwritePrefixAsRadio,
   overwritePrefixAsRequired,
   removeKindPrefix,
@@ -16,6 +17,19 @@ export type Action =
   | {
       type: "TOGGLE_LAYER_SELECTION";
       path: (string | undefined)[];
+    }
+  | {
+      type: "TOGGLE_CHILDREN_SELECTION";
+      path: (string | undefined)[];
+    }
+  | {
+      type: "TOGGLE_DESCENDANT_SELECTION";
+      path: (string | undefined)[];
+    }
+  | {
+      type: "RENAME_LAYER";
+      path: (string | undefined)[];
+      newName: string;
     }
   | {
       type: "GAIN_REQUIRED_TO_SELECTION";
@@ -74,20 +88,52 @@ export const reducer = (state: State, action: Action): State => {
       };
 
     case "TOGGLE_LAYER_SELECTION": {
-      const res = traverseByPath(state.root, action.path);
-      if (!res) {
-        return state;
-      }
-      const [children, key] = res;
-      const entry = children.get(key);
+      const entry = traverseByPath(state.root, action.path);
       if (!entry) {
         return state;
       }
-      children.set(key, { ...entry, isSelected: !entry.isSelected });
+      entry.isSelected = !entry.isSelected;
       return {
         ...state,
       };
     }
+    case "TOGGLE_CHILDREN_SELECTION": {
+      const entry = traverseByPath(state.root, action.path);
+      if (!entry) {
+        return state;
+      }
+      entry.children.forEach((child) => {
+        child.isSelected = !child.isSelected;
+      });
+      return {
+        ...state,
+      };
+    }
+    case "TOGGLE_DESCENDANT_SELECTION": {
+      const entry = traverseByPath(state.root, action.path);
+      if (!entry) {
+        return state;
+      }
+      const invertSelection = (layer: LayerStructure) => {
+        layer.isSelected = !layer.isSelected;
+        layer.children.forEach(invertSelection);
+      };
+      entry.children.forEach(invertSelection);
+      return {
+        ...state,
+      };
+    }
+    case "RENAME_LAYER": {
+      const entry = traverseByPath(state.root, action.path);
+      if (!entry) {
+        return state;
+      }
+      entry.name = action.newName;
+      return {
+        ...state,
+      };
+    }
+
     case "GAIN_REQUIRED_TO_SELECTION":
       traverseSelected(state.root.children, (layer) => ({
         ...layer,

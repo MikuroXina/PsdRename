@@ -79,7 +79,7 @@ export const exportAsPsd = (root: LayerRoot): Psd => ({
 export const traverseByPath = (
   root: LayerRoot,
   path: (string | undefined)[],
-): [LayerChildren, string] | undefined => {
+): LayerStructure | undefined => {
   let children = root.children;
   while (true) {
     const [nextLayer] = path;
@@ -96,12 +96,7 @@ export const traverseByPath = (
     children = entry.children;
     path.shift();
   }
-  const key = path[0]!;
-  const entry = children.get(key);
-  if (!entry) {
-    return undefined;
-  }
-  return [children, key];
+  return children.get(path[0]!);
 };
 
 export const traverseSelected = (
