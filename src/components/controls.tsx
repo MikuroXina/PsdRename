@@ -1,5 +1,5 @@
+import type { Dispatcher } from "../lib/reducer";
 import { useRef } from "react";
-import { Dispatcher } from "../lib/reducer";
 
 export interface ControlsProps {
   dispatch: Dispatcher;
@@ -45,6 +45,12 @@ export const Controls = ({ dispatch }: ControlsProps) => {
   const onDeselectAll = () => {
     dispatch({ type: "DESELECT_ALL" });
   };
+  const onUndo = () => {
+    dispatch({ type: "UNDO" });
+  };
+  const onRedo = () => {
+    dispatch({ type: "REDO" });
+  };
 
   return (
     <div>
@@ -73,6 +79,8 @@ export const Controls = ({ dispatch }: ControlsProps) => {
           </button>
         </div>
         <button onClick={onDeselectAll}>全選択解除</button>
+        <button onClick={onUndo}>取り消す</button>
+        <button onClick={onRedo}>やり直す</button>
       </div>
     </div>
   );

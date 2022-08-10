@@ -3,16 +3,16 @@ import type { LayerStructure } from "../lib/layers";
 import type { Dispatcher } from "../lib/reducer";
 
 interface TreeItemControlsProps {
-  path: string[];
+  path: readonly string[];
   dispatch: Dispatcher;
 }
 
 const TreeItemControls = ({ path, dispatch }: TreeItemControlsProps) => {
   const onToggleChildrenSelect = () => {
-    dispatch({ type: "TOGGLE_CHILDREN_SELECTION", path });
+    dispatch({ type: "TOGGLE_CHILDREN_SELECTION", path: [...path] });
   };
   const onToggleDescendantSelect = () => {
-    dispatch({ type: "TOGGLE_DESCENDANT_SELECTION", path });
+    dispatch({ type: "TOGGLE_DESCENDANT_SELECTION", path: [...path] });
   };
 
   return (
@@ -29,20 +29,22 @@ const TreeItemControls = ({ path, dispatch }: TreeItemControlsProps) => {
 
 interface SubLayerTreeProps {
   layer: LayerStructure;
-  path: string[];
   dispatch: Dispatcher;
 }
 
 const SubLayerTree = ({
-  layer: { name, isSelected, children, sourceInfo },
-  path,
+  layer: { name, path, isSelected, children, sourceInfo },
   dispatch,
 }: SubLayerTreeProps) => {
   const onToggleSelect = () => {
-    dispatch({ type: "TOGGLE_LAYER_SELECTION", path });
+    dispatch({ type: "TOGGLE_LAYER_SELECTION", path: [...path] });
   };
   const onChangeName = (e: ChangeEvent<HTMLInputElement>) => {
-    dispatch({ type: "RENAME_LAYER", path, newName: e.target.value });
+    dispatch({
+      type: "RENAME_LAYER",
+      path: [...path],
+      newName: e.target.value,
+    });
   };
 
   return (
@@ -66,12 +68,7 @@ const SubLayerTree = ({
             </div>
           </div>
           {[...children.values()].reverse().map((child) => (
-            <SubLayerTree
-              key={child.name}
-              path={[...path, child.name]}
-              layer={child}
-              dispatch={dispatch}
-            />
+            <SubLayerTree key={child.name} layer={child} dispatch={dispatch} />
           ))}
         </li>
       </ol>
@@ -115,12 +112,7 @@ export const LayerTree = ({ layers, dispatch }: LayerTreeProps) => {
   return (
     <div>
       {layers.reverse().map((child) => (
-        <SubLayerTree
-          key={child.name}
-          path={[child.name]}
-          layer={child}
-          dispatch={dispatch}
-        />
+        <SubLayerTree key={child.name} layer={child} dispatch={dispatch} />
       ))}
     </div>
   );

@@ -6,6 +6,7 @@ export type LayerChildren = Map<string, LayerStructure>;
 
 export interface LayerStructure {
   name: string;
+  path: readonly string[];
   kind: LayerKind;
   isSelected: boolean;
   sourceInfo?: Layer;
@@ -41,22 +42,33 @@ const kindFromName = (name: string): LayerKind =>
     ? "RADIO"
     : "OPTIONAL";
 
-const parseLayer = (layer: Layer): LayerStructure => ({
-  name: layer.name ?? "",
-  kind: kindFromName(layer.name ?? ""),
-  sourceInfo: layer,
-  isSelected: false,
-  children: new Map(
-    layer.children?.map((layer) => [layer.name ?? "", parseLayer(layer)]) ?? [],
-  ),
-});
+const parseLayer = (
+  layer: Layer,
+  parentPath: readonly string[],
+): LayerStructure => {
+  const path = [...parentPath, layer.name ?? ""];
+  return {
+    name: layer.name ?? "",
+    path,
+    kind: kindFromName(layer.name ?? ""),
+    sourceInfo: layer,
+    isSelected: false,
+    children: new Map(
+      layer.children?.map((layer) => [
+        layer.name ?? "",
+        parseLayer(layer, path),
+      ]) ?? [],
+    ),
+  };
+};
 
 export const parseRootLayer = (root: Psd): LayerRoot => ({
   width: root.width,
   height: root.height,
   sourceInfo: root,
   children: new Map(
-    root.children?.map((layer) => [layer.name ?? "", parseLayer(layer)]) ?? [],
+    root.children?.map((layer) => [layer.name ?? "", parseLayer(layer, [])]) ??
+      [],
   ),
 });
 
@@ -76,19 +88,32 @@ export const exportAsPsd = (root: LayerRoot): Psd => ({
   children: exportAsLayer(root.children),
 });
 
+export type LayerTransformer = (
+  layer: Readonly<LayerStructure>,
+) => LayerStructure;
+
+export type Renaming = {
+  path: readonly (string | undefined)[];
+  originalName: string;
+  originalKind: LayerKind;
+  newName: string;
+  newKind: LayerKind;
+}[];
+
 export const traverseByPath = (
   root: LayerRoot,
   path: (string | undefined)[],
-): LayerStructure | undefined => {
+  fn: LayerTransformer,
+): Renaming => {
   let children = root.children;
   while (true) {
     const [nextLayer] = path;
     if (!nextLayer) {
-      return undefined;
+      return [];
     }
     const entry: LayerStructure | undefined = children.get(nextLayer);
     if (!entry) {
-      return undefined;
+      return [];
     }
     if (path.length <= 1) {
       break;
@@ -96,18 +121,41 @@ export const traverseByPath = (
     children = entry.children;
     path.shift();
   }
-  return children.get(path[0]!);
+  const layer = children.get(path[0]!);
+  if (!layer) {
+    return [];
+  }
+  const newLayer = fn(layer);
+  children.set(path[0]!, newLayer);
+  return [
+    {
+      originalName: layer.name,
+      originalKind: layer.kind,
+      newName: newLayer.name,
+      newKind: newLayer.kind,
+      path,
+    },
+  ];
 };
 
 export const traverseSelected = (
   children: LayerChildren,
-  fn: (layer: Readonly<LayerStructure>) => LayerStructure,
-): void => {
+  fn: LayerTransformer,
+): Renaming => {
+  const remaining: Renaming = [];
   for (const [key, value] of children.entries()) {
-    traverseSelected(value.children, fn);
+    remaining.push(...traverseSelected(value.children, fn));
     if (value.isSelected) {
       const newValue = fn(value);
       children.set(key, newValue);
+      remaining.push({
+        originalName: value.name,
+        originalKind: value.kind,
+        newName: newValue.name,
+        newKind: newValue.kind,
+        path: [...newValue.path],
+      });
     }
   }
+  return remaining;
 };
