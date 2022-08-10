@@ -42,7 +42,7 @@ const Page: NextPage = () => {
       <div className="layer-tree">
         {
           <LayerTree
-            layers={[...state.root.children.values()]}
+            layers={Object.values(state.root.children)}
             dispatch={dispatch}
           />
         }

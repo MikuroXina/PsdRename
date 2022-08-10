@@ -1321,6 +1321,11 @@ minimist@^1.2.0, minimist@^1.2.6:
   resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.2.6.tgz#8637a5b759ea0d6e98702cfb3a9283323c93af44"
   integrity sha512-Jsjnk4bw3YJqYzbdyBiNsPWHPfO++UGG749Cxs6peCu5Xg4nrena6OVxOYxrQTqww0Jmwt+Ref8rggumkTLz9Q==
 
+monolite@^0.9.2:
+  version "0.9.2"
+  resolved "https://registry.yarnpkg.com/monolite/-/monolite-0.9.2.tgz#2b21b64be41db54b89d81ae769f9b63beb0c59db"
+  integrity sha512-U4W3t0dTWoyNhEmt99IM2xIjN03bqZDtf6XGFndROuqtLfGRzBdoyRxZX/Ngw6WSQHGBZT5dqOt8LW1hHMhdHw==
+
 ms@2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.0.0.tgz#5608aeadfc00be6c2901df5f9861788de0d597c8"

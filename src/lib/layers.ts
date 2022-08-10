@@ -1,12 +1,16 @@
 import type { Layer, Psd } from "ag-psd";
+import { set } from "monolite";
 
+declare const layerIdNominal: unique symbol;
+export type LayerId = number & { [layerIdNominal]: never };
+export type LayerPath = LayerId[];
 export type LayerKind = "OPTIONAL" | "REQUIRED" | "RADIO";
-
-export type LayerChildren = Map<string, LayerStructure>;
+export type LayerChildren = Record<string, LayerStructure>;
 
 export interface LayerStructure {
+  id: LayerId;
   name: string;
-  path: readonly string[];
+  path: Readonly<LayerPath>;
   kind: LayerKind;
   isSelected: boolean;
   sourceInfo?: Layer;
@@ -35,6 +39,17 @@ export const overwritePrefixAsRequired = (name: string) =>
 export const overwritePrefixAsRadio = (name: string) =>
   appendRadioPrefix(removeKindPrefix(name));
 
+const joinSeparator = (path: LayerPath, sep: string): string[] => {
+  const res: string[] = [];
+  while (path.length !== 0) {
+    res.push(sep);
+    res.push(path.shift()!.toString());
+  }
+  return res;
+};
+export const joinChildrenSep = (path: LayerPath) =>
+  joinSeparator(path, "children");
+
 const kindFromName = (name: string): LayerKind =>
   name.startsWith("!")
     ? "REQUIRED"
@@ -42,22 +57,27 @@ const kindFromName = (name: string): LayerKind =>
     ? "RADIO"
     : "OPTIONAL";
 
+let idStatic = 0;
+const newId = (): LayerId => ++idStatic as LayerId;
+
 const parseLayer = (
+  id: LayerId,
   layer: Layer,
-  parentPath: readonly string[],
+  parentPath: Readonly<LayerPath>,
 ): LayerStructure => {
-  const path = [...parentPath, layer.name ?? ""];
+  const path = [...parentPath, id];
   return {
     name: layer.name ?? "",
+    id,
     path,
     kind: kindFromName(layer.name ?? ""),
     sourceInfo: layer,
     isSelected: false,
-    children: new Map(
-      layer.children?.map((layer) => [
-        layer.name ?? "",
-        parseLayer(layer, path),
-      ]) ?? [],
+    children: Object.fromEntries(
+      layer.children?.map((layer) => {
+        const id = newId();
+        return [id, parseLayer(id, layer, path)];
+      }) ?? [],
     ),
   };
 };
@@ -66,14 +86,16 @@ export const parseRootLayer = (root: Psd): LayerRoot => ({
   width: root.width,
   height: root.height,
   sourceInfo: root,
-  children: new Map(
-    root.children?.map((layer) => [layer.name ?? "", parseLayer(layer, [])]) ??
-      [],
+  children: Object.fromEntries(
+    root.children?.map((layer) => {
+      const id = newId();
+      return [id, parseLayer(id, layer, [])];
+    }) ?? [],
   ),
 });
 
 const exportAsLayer = (children: LayerChildren): Layer[] =>
-  [...children.values()].map((child) => ({
+  Object.values(children).map((child) => ({
     ...child.sourceInfo,
     name: child.name,
     children: child.sourceInfo?.canvas
@@ -93,7 +115,7 @@ export type LayerTransformer = (
 ) => LayerStructure;
 
 export type Renaming = {
-  path: readonly (string | undefined)[];
+  path: Readonly<LayerPath>;
   originalName: string;
   originalKind: LayerKind;
   newName: string;
@@ -101,53 +123,48 @@ export type Renaming = {
 }[];
 
 export const traverseByPath = (
-  root: LayerRoot,
-  path: (string | undefined)[],
+  root: Readonly<LayerRoot>,
+  path: LayerPath,
   fn: LayerTransformer,
-): Renaming => {
-  let children = root.children;
-  while (true) {
-    const [nextLayer] = path;
-    if (!nextLayer) {
-      return [];
-    }
-    const entry: LayerStructure | undefined = children.get(nextLayer);
-    if (!entry) {
-      return [];
-    }
-    if (path.length <= 1) {
-      break;
-    }
-    children = entry.children;
-    path.shift();
-  }
-  const layer = children.get(path[0]!);
-  if (!layer) {
-    return [];
-  }
-  const newLayer = fn(layer);
-  children.set(path[0]!, newLayer);
+): [LayerRoot, Renaming] => {
+  let oldLayer: LayerStructure | null = null,
+    newLayer: LayerStructure | null = null;
+  const newRoot = set(root, [...joinChildrenSep(path)], (layer) => {
+    oldLayer = layer;
+    newLayer = fn(layer);
+    return newLayer;
+  });
   return [
-    {
-      originalName: layer.name,
-      originalKind: layer.kind,
-      newName: newLayer.name,
-      newKind: newLayer.kind,
-      path,
-    },
+    newRoot,
+    [
+      {
+        originalName: oldLayer!.name,
+        originalKind: oldLayer!.kind,
+        newName: newLayer!.name,
+        newKind: newLayer!.kind,
+        path,
+      },
+    ],
   ];
 };
 
 export const traverseSelected = (
-  children: LayerChildren,
+  children: Readonly<LayerChildren>,
   fn: LayerTransformer,
-): Renaming => {
+): [LayerChildren, Renaming] => {
   const remaining: Renaming = [];
-  for (const [key, value] of children.entries()) {
-    remaining.push(...traverseSelected(value.children, fn));
-    if (value.isSelected) {
-      const newValue = fn(value);
-      children.set(key, newValue);
+  const newChildren = Object.fromEntries(
+    Object.entries(children).map(([key, value]) => {
+      const [innerChildren, innerRenaming] = traverseSelected(
+        value.children,
+        fn,
+      );
+      remaining.push(...innerRenaming);
+      const traversedValue = set(value, (s) => s.children, innerChildren);
+      if (!value.isSelected) {
+        return [key, traversedValue];
+      }
+      const newValue = fn(traversedValue);
       remaining.push({
         originalName: value.name,
         originalKind: value.kind,
@@ -155,7 +172,8 @@ export const traverseSelected = (
         newKind: newValue.kind,
         path: [...newValue.path],
       });
-    }
-  }
-  return remaining;
+      return [key, newValue];
+    }),
+  );
+  return [newChildren, remaining];
 };

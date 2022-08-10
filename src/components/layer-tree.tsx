@@ -1,9 +1,9 @@
+import type { LayerPath, LayerStructure } from "../lib/layers";
 import type { ChangeEvent } from "react";
-import type { LayerStructure } from "../lib/layers";
 import type { Dispatcher } from "../lib/reducer";
 
 interface TreeItemControlsProps {
-  path: readonly string[];
+  path: Readonly<LayerPath>;
   dispatch: Dispatcher;
 }
 
@@ -67,9 +67,15 @@ const SubLayerTree = ({
               <TreeItemControls {...{ path, dispatch }} />
             </div>
           </div>
-          {[...children.values()].reverse().map((child) => (
-            <SubLayerTree key={child.name} layer={child} dispatch={dispatch} />
-          ))}
+          {Object.values(children)
+            .reverse()
+            .map((child) => (
+              <SubLayerTree
+                key={child.name}
+                layer={child}
+                dispatch={dispatch}
+              />
+            ))}
         </li>
       </ol>
       <style jsx>{`
