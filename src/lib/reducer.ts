@@ -135,7 +135,15 @@ export const reducer = (state: State, action: Action): State => {
           ]),
         ),
       });
-      const entry = traverseByPath(state.root, action.path, invertSelection);
+      traverseByPath(state.root, action.path, (layer) => ({
+        ...layer,
+        children: new Map(
+          [...layer.children.entries()].map(([key, value]) => [
+            key,
+            invertSelection(value),
+          ]),
+        ),
+      }));
       return {
         ...state,
       };
