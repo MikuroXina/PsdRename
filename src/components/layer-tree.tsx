@@ -28,7 +28,7 @@ const TreeItemControls = ({ path, dispatch }: TreeItemControlsProps) => {
 };
 
 interface SubLayerTreeProps {
-  layer: LayerStructure;
+  layer: Readonly<LayerStructure>;
   dispatch: Dispatcher;
 }
 
@@ -104,14 +104,14 @@ const SubLayerTree = ({
 };
 
 export interface LayerTreeProps {
-  layers: LayerStructure[];
+  layers: readonly Readonly<LayerStructure>[];
   dispatch: Dispatcher;
 }
 
 export const LayerTree = ({ layers, dispatch }: LayerTreeProps) => {
   return (
     <div>
-      {layers.reverse().map((child) => (
+      {[...layers].reverse().map((child) => (
         <SubLayerTree key={child.name} layer={child} dispatch={dispatch} />
       ))}
     </div>
