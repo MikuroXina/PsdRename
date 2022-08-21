@@ -1,4 +1,5 @@
 import type { LayerPath, LayerStructure } from "../lib/layers";
+
 import type { ChangeEvent } from "react";
 import type { Dispatcher } from "../lib/reducer";
 
@@ -48,7 +49,7 @@ const LayoutStats = ({
 
 const LayerEntry = ({ layer, dispatch }: SubLayerTreeProps) => (
   <>
-    <div className="layer-entry">
+    <div className="layer-entry" data-select={layer.isSelected}>
       <LayoutStats layer={layer} dispatch={dispatch} />
       <div className="controls">
         <TreeItemControls path={layer.path} dispatch={dispatch} />
@@ -60,6 +61,9 @@ const LayerEntry = ({ layer, dispatch }: SubLayerTreeProps) => (
         flex-flow: row;
         align-items: center;
         justify-content: space-between;
+      }
+      .layer-entry[data-select="true"] {
+        background-color: lightblue;
       }
       .layer-entry > .controls {
         visibility: hidden;
