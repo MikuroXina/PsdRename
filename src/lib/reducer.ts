@@ -13,6 +13,7 @@ import {
   traverseByPath,
   traverseSelected,
 } from "./layers";
+
 import { set } from "monolite";
 
 export interface State {
@@ -23,6 +24,18 @@ export interface State {
 }
 
 const invert = (bool: boolean) => !bool;
+
+const pushUndo = (state: State, renaming: Renaming): State =>
+  set(state)
+    .set(
+      (sel) => sel.pastHistory,
+      (pastHistory) => [...pastHistory, renaming],
+    )
+    .set(
+      (sel) => sel.futureHistory,
+      () => [],
+    )
+    .end();
 
 const reducers = {
   OPEN_PSD: (state: State, action: { root: LayerRoot; filename: string }) =>
@@ -83,13 +96,10 @@ const reducers = {
         name: action.newName,
       }),
     );
-    return set(state)
-      .set((sel) => sel.root, root)
-      .set(
-        (sel) => sel.pastHistory,
-        (pastHistory) => [...pastHistory, renaming],
-      )
-      .end();
+    return pushUndo(
+      set(state, (sel) => sel.root, root),
+      renaming,
+    );
   },
   GAIN_REQUIRED_TO_SELECTION: (state: State, _action: unknown) => {
     const [children, renaming] = traverseSelected(
@@ -100,13 +110,10 @@ const reducers = {
         kind: "REQUIRED",
       }),
     );
-    return set(state)
-      .set((sel) => sel.root.children, children)
-      .set(
-        (sel) => sel.pastHistory,
-        (pastHistory) => [...pastHistory, renaming],
-      )
-      .end();
+    return pushUndo(
+      set(state, (sel) => sel.root.children, children),
+      renaming,
+    );
   },
   GAIN_RADIO_TO_SELECTION: (state: State, _action: unknown) => {
     const [children, renaming] = traverseSelected(
@@ -117,13 +124,10 @@ const reducers = {
         kind: "RADIO",
       }),
     );
-    return set(state)
-      .set((sel) => sel.root.children, children)
-      .set(
-        (sel) => sel.pastHistory,
-        (pastHistory) => [...pastHistory, renaming],
-      )
-      .end();
+    return pushUndo(
+      set(state, (sel) => sel.root.children, children),
+      renaming,
+    );
   },
   REMOVE_SPECIFIER_FROM_SELECTION: (state: State, _action: unknown) => {
     const [children, renaming] = traverseSelected(
@@ -134,13 +138,10 @@ const reducers = {
         kind: "OPTIONAL",
       }),
     );
-    return set(state)
-      .set((sel) => sel.root.children, children)
-      .set(
-        (sel) => sel.pastHistory,
-        (pastHistory) => [...pastHistory, renaming],
-      )
-      .end();
+    return pushUndo(
+      set(state, (sel) => sel.root.children, children),
+      renaming,
+    );
   },
   APPEND_PREFIX_TO_SELECTION: (state: State, action: { prefix: string }) => {
     const [children, renaming] = traverseSelected(
@@ -152,13 +153,10 @@ const reducers = {
           : `${action.prefix}${layer.name}`,
       }),
     );
-    return set(state)
-      .set((sel) => sel.root.children, children)
-      .set(
-        (sel) => sel.pastHistory,
-        (pastHistory) => [...pastHistory, renaming],
-      )
-      .end();
+    return pushUndo(
+      set(state, (sel) => sel.root.children, children),
+      renaming,
+    );
   },
   REMOVE_PREFIX_FROM_SELECTION: (state: State, action: { prefix: string }) => {
     const [children, renaming] = traverseSelected(
@@ -173,13 +171,10 @@ const reducers = {
               : name,
         ),
     );
-    return set(state)
-      .set((sel) => sel.root.children, children)
-      .set(
-        (sel) => sel.pastHistory,
-        (pastHistory) => [...pastHistory, renaming],
-      )
-      .end();
+    return pushUndo(
+      set(state, (sel) => sel.root.children, children),
+      renaming,
+    );
   },
   APPEND_POSTFIX_TO_SELECTION: (state: State, action: { postfix: string }) => {
     const [children, renaming] = traverseSelected(
@@ -192,13 +187,10 @@ const reducers = {
             name.endsWith(action.postfix) ? name : `${name}${action.postfix}`,
         ),
     );
-    return set(state)
-      .set((sel) => sel.root.children, children)
-      .set(
-        (sel) => sel.pastHistory,
-        (pastHistory) => [...pastHistory, renaming],
-      )
-      .end();
+    return pushUndo(
+      set(state, (sel) => sel.root.children, children),
+      renaming,
+    );
   },
   REMOVE_POSTFIX_FROM_SELECTION: (
     state: State,
@@ -213,13 +205,10 @@ const reducers = {
           : layer.name,
       }),
     );
-    return set(state)
-      .set((sel) => sel.root.children, children)
-      .set(
-        (sel) => sel.pastHistory,
-        (pastHistory) => [...pastHistory, renaming],
-      )
-      .end();
+    return pushUndo(
+      set(state, (sel) => sel.root.children, children),
+      renaming,
+    );
   },
   DESELECT_ALL: (state: State, _action: unknown) => {
     const [children] = traverseSelected(state.root.children, (layer) => ({
