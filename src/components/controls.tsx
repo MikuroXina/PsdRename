@@ -1,11 +1,14 @@
 import { RefObject, useRef } from "react";
+
 import type { Dispatcher } from "../lib/reducer";
 
 export interface ControlsProps {
   dispatch: Dispatcher;
+  canUndo: boolean;
+  canRedo: boolean;
 }
 
-export const Controls = ({ dispatch }: ControlsProps) => {
+export const Controls = ({ dispatch, canUndo, canRedo }: ControlsProps) => {
   const prefixPattern = useRef<HTMLInputElement>(null);
   const postfixPattern = useRef<HTMLInputElement>(null);
 
@@ -49,8 +52,12 @@ export const Controls = ({ dispatch }: ControlsProps) => {
           </button>
         </div>
         <button onClick={onDeselectAll}>全選択解除</button>
-        <button onClick={onUndo}>取り消す</button>
-        <button onClick={onRedo}>やり直す</button>
+        <button onClick={onUndo} disabled={!canUndo}>
+          取り消す
+        </button>
+        <button onClick={onRedo} disabled={!canRedo}>
+          やり直す
+        </button>
       </div>
     </div>
   );

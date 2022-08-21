@@ -2,6 +2,7 @@ import { ChangeEvent, useReducer } from "react";
 import { Psd, readPsd, writePsd } from "ag-psd";
 import { exportAsPsd, parseRootLayer } from "../lib/layers";
 import { initialState, reducer } from "../lib/reducer";
+
 import { Controls } from "../components/controls";
 import { LayerTree } from "../components/layer-tree";
 import type { NextPage } from "next";
@@ -51,7 +52,11 @@ const Page: NextPage = () => {
           dispatch={dispatch}
         />
       </div>
-      <Controls dispatch={dispatch} />
+      <Controls
+        dispatch={dispatch}
+        canUndo={state.pastHistory.length !== 0}
+        canRedo={state.futureHistory.length !== 0}
+      />
       <style jsx>{`
         .layer-tree {
           height: 50vh;
