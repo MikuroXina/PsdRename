@@ -101,7 +101,7 @@ const reducers = {
       renaming,
     );
   },
-  GAIN_REQUIRED_TO_SELECTION: (state: State, _action: unknown) => {
+  GAIN_REQUIRED_TO_SELECTION: (state: State) => {
     const [children, renaming] = traverseSelected(
       state.root.children,
       (layer) => ({
@@ -115,7 +115,7 @@ const reducers = {
       renaming,
     );
   },
-  GAIN_RADIO_TO_SELECTION: (state: State, _action: unknown) => {
+  GAIN_RADIO_TO_SELECTION: (state: State) => {
     const [children, renaming] = traverseSelected(
       state.root.children,
       (layer) => ({
@@ -129,7 +129,7 @@ const reducers = {
       renaming,
     );
   },
-  REMOVE_SPECIFIER_FROM_SELECTION: (state: State, _action: unknown) => {
+  REMOVE_SPECIFIER_FROM_SELECTION: (state: State) => {
     const [children, renaming] = traverseSelected(
       state.root.children,
       (layer) => ({
@@ -210,14 +210,14 @@ const reducers = {
       renaming,
     );
   },
-  DESELECT_ALL: (state: State, _action: unknown) => {
+  DESELECT_ALL: (state: State) => {
     const [children] = traverseSelected(state.root.children, (layer) => ({
       ...layer,
       isSelected: false,
     }));
     return set(state, (sel) => sel.root.children, children);
   },
-  UNDO: (state: State, _action: unknown) => {
+  UNDO: (state: State) => {
     const { pastHistory } = state;
     const toUndo = pastHistory[pastHistory.length - 1];
     return set(state)
@@ -235,7 +235,7 @@ const reducers = {
       )
       .end();
   },
-  REDO: (state: State, _action: unknown) => {
+  REDO: (state: State) => {
     const { futureHistory } = state;
     const toRedo = futureHistory[futureHistory.length - 1];
     return set(state)
