@@ -8,14 +8,6 @@ interface SubLayerTreeProps {
   dispatch: Dispatcher;
 }
 
-const LayerNameInput = ({
-  name,
-  onChangeName,
-}: {
-  name: string;
-  onChangeName: (event: ChangeEvent<HTMLInputElement>) => void;
-}) => <input defaultValue={name} onChange={onChangeName} />;
-
 const LayoutStats = ({
   layer: { id, path, isSelected, sourceInfo, name },
   dispatch,
@@ -35,7 +27,7 @@ const LayoutStats = ({
     <div>
       <input type="checkbox" checked={isSelected} onChange={onToggleSelect} />
       {sourceInfo?.canvas && <img src={sourceInfo?.canvas?.toDataURL()} />}
-      <LayerNameInput key={id} name={name} onChangeName={onChangeName} />
+      <input key={id} value={name} onChange={onChangeName} />
       <style jsx>{`
         img {
           width: 20px;
