@@ -223,6 +223,7 @@
       {
         "ignore": ["jsx"]
       }
-    ]
+    ],
+    "@next/next/no-img-element": "off"
   }
 }
