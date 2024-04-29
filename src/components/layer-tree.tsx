@@ -9,7 +9,7 @@ interface SubLayerTreeProps {
 }
 
 const LayoutStats = ({
-  layer: { id, path, isSelected, sourceInfo, name },
+  layer: { path, isSelected, sourceInfo, name },
   dispatch,
 }: SubLayerTreeProps) => {
   const onToggleSelect = () =>
@@ -27,7 +27,7 @@ const LayoutStats = ({
     <div>
       <input type="checkbox" checked={isSelected} onChange={onToggleSelect} />
       {sourceInfo?.canvas && <img src={sourceInfo?.canvas?.toDataURL()} />}
-      <input key={id} value={name} onChange={onChangeName} />
+      <input value={name} onChange={onChangeName} />
       <style jsx>{`
         img {
           width: 20px;
@@ -97,7 +97,7 @@ const SubLayerTree = ({ layer, dispatch }: SubLayerTreeProps) => (
         {Object.values(layer.children)
           .reverse()
           .map((child) => (
-            <SubLayerTree key={child.name} layer={child} dispatch={dispatch} />
+            <SubLayerTree key={child.id} layer={child} dispatch={dispatch} />
           ))}
       </li>
     </ol>
@@ -122,7 +122,7 @@ export interface LayerTreeProps {
 export const LayerTree = ({ layers, dispatch }: LayerTreeProps) => (
   <div>
     {[...layers].reverse().map((child) => (
-      <SubLayerTree key={child.name} layer={child} dispatch={dispatch} />
+      <SubLayerTree key={child.id} layer={child} dispatch={dispatch} />
     ))}
   </div>
 );
