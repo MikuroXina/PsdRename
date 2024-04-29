@@ -1,0 +1,24 @@
+{
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "extends": ["config:base", ":timezone(Asia/Tokyo)"],
+    "semanticCommits": "enabled",
+    "fetchReleaseNotes": true,
+    "enabledManagers": ["bun"],
+    "schedule": ["on the first day of the week"],
+    "commitMessagePrefix": "chore(deps): ",
+    "dependencyDashboard": true,
+    "prHourlyLimit": 0,
+    "platformAutomerge": true,
+    "prConcurrentLimit": 5,
+    "automerge": true,
+    "major": {
+        "automerge": false
+    },
+    "npm": {
+      "stabilityDays": 3
+    },
+    "vulnerabilityAlerts": {
+        "enabled": true,
+        "automerge": true
+    }
+}
