@@ -65,8 +65,8 @@ export const Controls = ({ dispatch, canUndo, canRedo }: ControlsProps) => {
 
 const makeCallbacks = (
   dispatch: Dispatcher,
-  prefixPattern: RefObject<HTMLInputElement>,
-  postfixPattern: RefObject<HTMLInputElement>,
+  prefixPattern: RefObject<HTMLInputElement | null>,
+  postfixPattern: RefObject<HTMLInputElement | null>,
 ) => {
   const onAddRequired = () => dispatch(["GAIN_REQUIRED_TO_SELECTION", {}]);
   const onAddRadio = () => dispatch(["GAIN_RADIO_TO_SELECTION", {}]);
