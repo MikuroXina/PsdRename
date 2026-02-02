@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       ag-psd:
-        specifier: ^29.0.0
-        version: 29.1.0
+        specifier: ^30.0.0
+        version: 30.1.0
       file-saver:
         specifier: ^2.0.5
         version: 2.0.5
@@ -654,8 +654,8 @@ packages:
     engines: {node: '>=0.4.0'}
     hasBin: true
 
-  ag-psd@29.1.0:
-    resolution: {integrity: sha512-6crH4JX1mlYQ0C2rmzSmQEDh+P5IooF9trl4n4Gi5SbCbqoTsDSnnTYdxNuY/o+NI/0ItN5KLhUUDlhM4mj7fw==}
+  ag-psd@30.1.0:
+    resolution: {integrity: sha512-1ce6o84aC+oVyl83A35HHUniGjwA3piHmGem3J2odBOFRq5p7i4htaco94vePLfOcingZu4fsyospJLwPagkhg==}
 
   ajv@6.12.6:
     resolution: {integrity: sha512-j3fVLgvTo527anyYyJOGTYJbG+vnnQYvE0m5mmkc1TK+nxAppkCLMIL0aZ4dblVCNoGShhm+kzE4ZUykBoMg4g==}
@@ -2368,7 +2368,7 @@ snapshots:
 
   acorn@8.15.0: {}
 
-  ag-psd@29.1.0:
+  ag-psd@30.1.0:
     dependencies:
       base64-js: 1.5.1
       pako: 2.1.0
